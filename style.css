@@ -1,0 +1,350 @@
+:root {
+    --bg-color: #005f73;
+    --surface-color: #004554;
+    --text-color: #ffffff;
+    --border-color: rgba(255, 255, 255, 0.15);
+    --primary-color: #e9d8a6;
+    --primary-hover: #d4c391;
+    --primary-text: #f4e8c1;
+    --danger-color: #e63946;
+    --danger-hover: #bc2d39;
+    --success-color: #94d2bd;
+}
+
+body {
+    background: linear-gradient(135deg, var(--bg-color) 0%, #003e4b 100%);
+    background-attachment: fixed;
+    color: var(--text-color);
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.app-container {
+    max-width: 1400px;
+    /* Alargado para caber full-width */
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.app-logo {
+    height: 45px;
+    width: auto;
+    object-fit: contain;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 15px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    /* Permitir que o date picker não quebre layout em telas menores */
+    gap: 15px;
+}
+
+h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.date-navigator {
+    display: flex;
+    align-items: center;
+    background: rgba(0, 69, 84, 0.4);
+    /* surface color translucida */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 8px 15px;
+    border-radius: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.date-picker {
+    background: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* Centralização do título das tabelas */
+.table-title {
+    text-align: center;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: var(--primary-text);
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: #003e4b;
+    /* Constraste escuro sobre o fundo claro da primary-color */
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-capture {
+    background-color: var(--success-color);
+}
+
+.btn-capture:hover {
+    background-color: #00b3a3;
+}
+
+/* Botões do modal Ajustes */
+.btn-action {
+    background: var(--surface-color);
+    color: var(--primary-text);
+    border: 1px solid var(--border-color);
+}
+
+.btn-action:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(0, 69, 84, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+th,
+td {
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    text-align: center;
+}
+
+th {
+    background-color: rgba(0, 0, 0, 0.2);
+    font-weight: 500;
+}
+
+input,
+select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 6px;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-family: 'Poppins', sans-serif;
+}
+
+input:focus,
+select:focus {
+    outline: 1px solid var(--primary-color);
+}
+
+.btn-delete {
+    background-color: var(--danger-color);
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.btn-delete:hover {
+    background-color: var(--danger-hover);
+}
+
+.btn-add-row {
+    background: transparent;
+    color: var(--primary-text);
+    border: 1px dashed var(--primary-color);
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 20px;
+}
+
+.btn-add-row:hover {
+    background: rgba(0, 95, 115, 0.2);
+}
+
+/* Utilities */
+.hidden {
+    display: none !important;
+}
+
+/* Modais */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 999;
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 69, 84, 0.85);
+    /* Vidro mais opaco pro Modal */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    padding: 25px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    z-index: 1000;
+    width: 80%;
+    max-width: 900px;
+    /* 3 painéis agora */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.settings-col {
+    background: rgba(0, 0, 0, 0.15);
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+
+.tech-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tech-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.tech-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background: var(--bg-color);
+    margin-bottom: 5px;
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+}
+
+.tech-list button {
+    padding: 4px 8px;
+    background-color: var(--danger-color);
+    color: white;
+}
+
+/* Visão Mensal */
+.monthly-full-container {
+    width: 100%;
+}
+
+.monthly-grid {
+    display: grid;
+    /* Mudando de flex row para grid blocks */
+    grid-template-columns: 1fr;
+    /* Um por linha para caber completas */
+    gap: 30px;
+    padding-bottom: 20px;
+}
+
+.monthly-panel {
+    background: rgba(0, 69, 84, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.monthly-panel h3 {
+    text-align: center;
+    color: var(--primary-text);
+    font-size: 1.4rem;
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+    padding-bottom: 10px;
+}
+
+/* =======================================================
+   ESTADO DE CAPTURA
+======================================================= */
+.capture-container {
+    padding: 20px 30px 40px 30px;
+    /* Cima, Direita, Baixo(Anti-corte), Esquerda - Afastamento da Borda */
+    background: linear-gradient(135deg, var(--bg-color) 0%, #003e4b 100%);
+    border-radius: 8px;
+}
+
+.is-capturing {
+    background-color: var(--bg-color) !important;
+}
+
+.is-capturing .no-capture {
+    display: none !important;
+}
+
+.is-capturing input,
+.is-capturing select {
+    border: none;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    color: var(--text-color);
+    padding: 0;
+    font-weight: 500;
+    text-align: center;
+}
+
+.is-capturing select:disabled {
+    opacity: 1;
+}
+
+.is-capturing table,
+.is-capturing th,
+.is-capturing td {
+    border-color: rgba(255, 255, 255, 0.25);
+}

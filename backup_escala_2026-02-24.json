@@ -1,0 +1,40 @@
+{
+  "version": "2.0",
+  "technicians": [
+    "André"
+  ],
+  "sites": [
+    "São Luís"
+  ],
+  "daily_scales": {
+    "2026-02-28": {
+      "N1": [
+        {
+          "time": "",
+          "name": "",
+          "date": "28/02/2026 e ",
+          "mode": "",
+          "site": ""
+        }
+      ],
+      "N2": [
+        {
+          "time": "",
+          "name": "",
+          "date": "28/02/2026",
+          "mode": "",
+          "site": ""
+        }
+      ],
+      "GA": [
+        {
+          "time": "",
+          "name": "",
+          "date": "28/02/2026",
+          "mode": "",
+          "site": ""
+        }
+      ]
+    }
+  }
+}

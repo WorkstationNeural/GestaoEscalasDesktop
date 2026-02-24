@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Escalas</title>
+    <!-- Fonte Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- Estilos -->
+    <link rel="stylesheet" href="style.css">
+    <!-- Biblioteca html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+
+<body>
+    <div id="tech-modal-backdrop" class="modal-backdrop hidden"></div>
+    <div id="tech-modal" class="modal hidden">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 15px;">
+            <h2 style="margin: 0; color: var(--primary-color);">Ajustes do Sistema</h2>
+            <div style="display: flex; gap: 10px;">
+                <button id="btn-export-backup" class="btn-action">Exportar Backup</button>
+                <button id="btn-import-backup" class="btn-action">Importar Backup</button>
+            </div>
+        </div>
+
+        <div class="settings-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+            <!-- Coluna Técnicos -->
+            <div class="settings-col">
+                <h3 style="color: var(--primary-text); margin-top: 0;">Técnicos</h3>
+                <div class="tech-input-group">
+                    <input type="text" id="new-tech-name" placeholder="Nome do Técnico">
+                    <button id="btn-add-tech">Add</button>
+                </div>
+                <ul id="tech-list" class="tech-list"></ul>
+            </div>
+
+            <!-- Coluna Modalidade -->
+            <div class="settings-col">
+                <h3 style="color: var(--primary-text); margin-top: 0;">Modalidade</h3>
+                <div class="tech-input-group">
+                    <input type="text" id="new-mode-name" placeholder="Presencial, etc">
+                    <button id="btn-add-mode">Add</button>
+                </div>
+                <ul id="mode-list" class="tech-list"></ul>
+            </div>
+
+            <!-- Coluna Sites -->
+            <div class="settings-col">
+                <h3 style="color: var(--primary-text); margin-top: 0;">Sites (Locais)</h3>
+                <div class="tech-input-group">
+                    <input type="text" id="new-site-name" placeholder="Nome do Site/Local">
+                    <button id="btn-add-site">Add</button>
+                </div>
+                <ul id="site-list" class="tech-list"></ul>
+            </div>
+        </div>
+
+        <button id="btn-close-modal" style="margin-top: 20px; width: 100%; font-size: 1.1em;">Fechar Ajustes</button>
+    </div>
+
+    <!-- Datalist para horários editáveis via teclado ou por sugestões -->
+    <datalist id="time-suggestions">
+        <option value="06:00"></option>
+        <option value="07:00"></option>
+        <option value="08:00"></option>
+        <option value="09:00"></option>
+        <option value="10:00"></option>
+        <option value="11:00"></option>
+        <option value="12:00"></option>
+        <option value="13:00"></option>
+        <option value="14:00"></option>
+        <option value="15:00"></option>
+        <option value="16:00"></option>
+        <option value="17:00"></option>
+        <option value="18:00"></option>
+        <option value="19:00"></option>
+        <option value="20:00"></option>
+        <option value="21:00"></option>
+        <option value="22:00"></option>
+        <option value="23:00"></option>
+        <option value="00:00"></option>
+    </datalist>
+
+    <div class="app-container">
+        <!-- VISÃO DIÁRIA -->
+        <div id="view-main" class="view">
+            <header>
+                <div class="brand">
+                    <img src="logo.png" alt="Logo" class="app-logo">
+                    <div>
+                        <h1>Gestão de Escalas</h1>
+                    </div>
+                </div>
+                <div class="date-navigator no-capture">
+                    <label for="current-date-picker" style="font-weight: 500; margin-right: 10px;">Escala do
+                        Dia:</label>
+                    <input type="date" id="current-date-picker" class="date-picker">
+                </div>
+                <div class="actions no-capture">
+                    <button id="btn-open-techs">Ajustes</button>
+                    <button id="btn-show-monthly">Visão Mensal (Sábados)</button>
+                    <button class="btn-capture" onclick="captureScale('capture-area', 'Diaria')">Capturar
+                        Escala</button>
+                </div>
+            </header>
+
+            <div id="capture-area" class="capture-container">
+                <h2 id="daily-subtitle" style="text-align: center; color: var(--primary-text); margin-bottom: 25px;">
+                    Escala do Dia --/--/----</h2>
+
+                <div class="table-section" id="section-n1">
+                    <h2 class="table-title">N1</h2>
+                    <table data-table="N1">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Nome</th>
+                                <th>Data</th>
+                                <th>Modalidade</th>
+                                <th>Site</th>
+                                <th class="no-capture">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button class="btn-add-row no-capture" data-table="N1">+ Adicionar Linha N1</button>
+                </div>
+
+                <div class="table-section" id="section-n2">
+                    <h2 class="table-title">N2</h2>
+                    <table data-table="N2">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Nome</th>
+                                <th>Data</th>
+                                <th>Modalidade</th>
+                                <th>Site</th>
+                                <th class="no-capture">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button class="btn-add-row no-capture" data-table="N2">+ Adicionar Linha N2</button>
+                </div>
+
+                <div class="table-section" id="section-ga">
+                    <h2 class="table-title">G.A</h2>
+                    <table data-table="GA">
+                        <thead>
+                            <tr>
+                                <th>Horário</th>
+                                <th>Nome</th>
+                                <th>Data</th>
+                                <th>Modalidade</th>
+                                <th>Site</th>
+                                <th class="no-capture">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button class="btn-add-row no-capture" data-table="GA">+ Adicionar Linha G.A</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VISÃO MENSAL DE SÁBADOS -->
+        <div id="view-monthly" class="view hidden">
+            <header>
+                <div class="brand">
+                    <img src="logo.png" alt="Logo" class="app-logo">
+                    <h1 id="monthly-title">Visão Mensal - Sábados</h1>
+                </div>
+                <div class="actions no-capture">
+                    <button id="btn-show-main">Voltar à Visão Diária</button>
+                    <button class="btn-capture" onclick="captureScale('capture-area-monthly', 'Mensal')">Capturar
+                        Mensal</button>
+                </div>
+            </header>
+
+            <div id="capture-area-monthly" class="capture-container monthly-full-container">
+                <div class="monthly-grid" id="monthly-grid-container">
+                    <!-- Gerado dinamicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+
+</html>
