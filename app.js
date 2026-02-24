@@ -104,6 +104,9 @@ function setupEventListeners() {
         });
     });
 
+    // Publicar na Web
+    document.getElementById('btn-publish-web').addEventListener('click', publishScale);
+
     // Auto-Save listeners
     document.body.addEventListener('input', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
@@ -597,3 +600,168 @@ window.captureScale = async function (elementId, viewName) {
         });
     }, 150);
 };
+
+// === PUBLICAÇÃO WEB (GITHUB PAGES) ===
+
+async function publishScale() {
+    if (!window.pywebview) {
+        alert("O recurso de publicação nativa precisa do aplicativo principal (.exe).");
+        return;
+    }
+
+    if (!currentSelectedDate || !dailyScales[currentSelectedDate]) {
+        alert("Não há dados para a data selecionada.");
+        return;
+    }
+
+    const btn = document.getElementById('btn-publish-web');
+    const originalText = btn.textContent;
+    btn.textContent = "Publicando...";
+    btn.disabled = true;
+
+    try {
+        const htmlContent = generateStaticHtml(currentSelectedDate);
+        const result = await window.pywebview.api.publish_to_github(htmlContent, currentSelectedDate);
+
+        if (result.error) {
+            alert("Erro ao publicar: " + result.error);
+        } else if (result.url) {
+            // Mostrar modal ou alert com o link longo
+            prompt("Escala publicada com sucesso! Copie o link abaixo para compartilhar:", result.url);
+        }
+    } catch (e) {
+        console.error("Erro na ponte python:", e);
+        alert("Falha de comunicação com o backend.");
+    } finally {
+        btn.textContent = originalText;
+        btn.disabled = false;
+    }
+}
+
+function generateStaticHtml(dateStr) {
+    const data = dailyScales[dateStr];
+    const formattedDate = formatBR(dateStr);
+
+    let tablesHtml = '';
+
+    MAIN_TABLES.forEach(tableId => {
+        const rows = data[tableId] || [];
+        if (rows.length === 0) return; // Pula tabelas vazias
+
+        let rowsHtml = '';
+        rows.forEach(r => {
+            rowsHtml += `
+            <tr>
+                <td>${r.time || '-'}</td>
+                <td>${r.name || '-'}</td>
+                <td>${r.date || '-'}</td>
+                <td>${r.mode || '-'}</td>
+                <td>${r.site || '-'}</td>
+            </tr>`;
+        });
+
+        tablesHtml += `
+        <div class="table-section">
+            <h2 class="table-title">${tableId}</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Horário</th>
+                        <th>Nome</th>
+                        <th>Data</th>
+                        <th>Modalidade</th>
+                        <th>Site</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+        </div>`;
+    });
+
+    // HTML base com CSS embutido minimalista e inspirado no original
+    return `
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala do Dia - ${formattedDate}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #005f73;
+            --text-color: #e0f2f1;
+            --primary-color: #0a9396;
+            --secondary-color: #94d2bd;
+            --table-bg: rgba(255, 255, 255, 0.05);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --hover-color: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            background: linear-gradient(135deg, var(--bg-color) 0%, #003e4b 100%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+        }
+        h1, h2, h3 { color: #fff; text-align: center; }
+        .table-section { margin-bottom: 30px; }
+        .table-title {
+            background-color: var(--primary-color);
+            color: #fff;
+            padding: 10px;
+            margin: 0;
+            border-radius: 8px 8px 0 0;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--table-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            color: var(--secondary-color);
+            text-transform: uppercase;
+            font-size: 0.9em;
+        }
+        tr:last-child td { border-bottom: none; }
+        tr:hover { background-color: var(--hover-color); }
+        .footer { text-align: center; margin-top: 50px; font-size: 0.8em; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gestão de Escalas</h1>
+        <h2>Escala do Dia ${formattedDate}</h2>
+        ${tablesHtml}
+        <div class="footer">Gerado automaticamente pelo sistema Desktop. Apenas Leitura.</div>
+    </div>
+</body>
+</html>`;
+}

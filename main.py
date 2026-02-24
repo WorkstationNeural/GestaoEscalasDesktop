@@ -3,6 +3,8 @@ import os
 import sys
 import json
 import base64
+import urllib.request
+import urllib.error
 
 def get_current_dir():
     # Quando transformado em .exe com PyInstaller, os arquivos são extraídos num diretório temporário
@@ -90,6 +92,69 @@ class Api:
         except Exception as e:
             print(f"Erro ao importar backup: {e}")
             return None
+
+    def publish_to_github(self, html_content, date_str):
+        """Publica um arquivo HTML estático no GitHub Pages para a data informada"""
+        # Try to read token from local file
+        token_file = os.path.join(get_current_dir(), '.ghtoken')
+        token = ""
+        if os.path.exists(token_file):
+            with open(token_file, 'r', encoding='utf-8') as f:
+                token = f.read().strip()
+                
+        repo = "WorkstationNeural/GestaoEscalasDesktop"
+        branch = "gh-pages"
+        file_path = f"diarias/{date_str}/index.html"
+        url = f"https://api.github.com/repos/{repo}/contents/{file_path}"
+        
+        headers = {
+            "Authorization": f"token {token}",
+            "Accept": "application/vnd.github.v3+json",
+            "User-Agent": "PyWebView-App"
+        }
+        
+        # 1. Verifica se o branch existe, se não, não conseguiremos criar pelo endpoint de contents facilmente sem um commit base, 
+        # mas como é gh-pages, a abordagem ideal pra garantir é usar a API de forma segura.
+        # Primeiro, tentar dar GET no arquivo pra pegar o SHA se ele já existir (para atualizar).
+        sha = None
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req) as response:
+                res_data = json.loads(response.read().decode())
+                sha = res_data.get('sha')
+        except urllib.error.HTTPError as e:
+            if e.code != 404:
+                return {"error": f"Erro ao acessar GitHub API: {e.code}"}
+        except Exception as e:
+            return {"error": str(e)}
+
+        # 2. Prepara o payload para criar/atualizar o arquivo no branch gh-pages
+        content_b64 = base64.b64encode(html_content.encode('utf-8')).decode('utf-8')
+        payload = {
+            "message": f"Publicando escala do dia {date_str}",
+            "content": content_b64,
+            "branch": branch
+        }
+        if sha:
+            payload["sha"] = sha
+            
+        data = json.dumps(payload).encode('utf-8')
+        
+        try:
+            req = urllib.request.Request(url, data=data, headers=headers, method='PUT')
+            with urllib.request.urlopen(req) as response:
+                result = json.loads(response.read().decode())
+                
+            # Retorna URL pública baseada no formato do Github Pages
+            public_url = f"https://WorkstationNeural.github.io/GestaoEscalasDesktop/{file_path}"
+            return {"url": public_url}
+            
+        except urllib.error.HTTPError as e:
+            err_msg = e.read().decode()
+            print("Erro no upload:", err_msg)
+            return {"error": f"Falha ao enviar ao GitHub: {err_msg}"}
+        except Exception as e:
+            return {"error": str(e)}
 
 if __name__ == '__main__':
     html_path = os.path.join(get_current_dir(), 'index.html')
