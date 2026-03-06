@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestão de Escalas - Painel Web</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --bg-color: #005f73;
@@ -54,7 +56,7 @@
             margin: 15px 0;
             border-radius: 6px;
             border: 1px solid var(--border-color);
-            background: rgba(0,0,0,0.2);
+            background: rgba(0, 0, 0, 0.2);
             color: #fff;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
@@ -151,7 +153,8 @@
             border-collapse: collapse;
         }
 
-        th, td {
+        th,
+        td {
             border: 1px solid var(--border-color);
             padding: 8px;
             text-align: center;
@@ -163,7 +166,8 @@
             font-weight: 500;
         }
 
-        input[type="text"], select {
+        input[type="text"],
+        select {
             width: 100%;
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -172,6 +176,18 @@
             border-radius: 4px;
             box-sizing: border-box;
             font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus,
+        select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            outline: 1px solid var(--primary-color);
+        }
+
+        select option {
+            background-color: var(--surface-color);
+            color: #fff;
         }
 
         .time-container {
@@ -180,6 +196,7 @@
             gap: 5px;
             justify-content: center;
         }
+
         .time-container input[type="time"] {
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -200,7 +217,7 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             padding: 10px 20px;
             border-radius: 20px;
             font-size: 0.9em;
@@ -209,16 +226,19 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- TELA DE LOGIN -->
     <div id="login-screen">
         <div class="login-box">
             <h2 style="color: var(--primary-text); margin-top: 0;">Acesso Restrito</h2>
-            <p style="font-size: 0.9em; opacity: 0.8;">Para editar escalas remotamente, insira o seu Personal Access Token do GitHub.</p>
+            <p style="font-size: 0.9em; opacity: 0.8;">Para editar escalas remotamente, insira o seu Personal Access
+                Token do GitHub.</p>
             <input type="password" id="gh-token" placeholder="ghp_****************************">
             <button onclick="login()">Acessar Painel</button>
-            <div id="login-error" style="color: var(--danger-color); margin-top: 10px; display: none;">Token inválido ou sem acesso.</div>
+            <div id="login-error" style="color: var(--danger-color); margin-top: 10px; display: none;">Token inválido ou
+                sem acesso.</div>
         </div>
     </div>
 
@@ -230,7 +250,11 @@
                 <label>Data:</label>
                 <input type="date" id="date-picker">
             </div>
-            <button class="btn-logout" onclick="logout()">Sair (Remover Token)</button>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-capture" onclick="captureWebScale()"
+                    style="background-color: var(--success-color);">📸 Salvar Imagem</button>
+                <button class="btn-logout" onclick="logout()" style="margin: 0;">Sair (Remover Token)</button>
+            </div>
         </header>
 
         <div id="tables-container">
@@ -249,7 +273,7 @@
         const REPO = "WorkstationNeural/GestaoEscalasDesktop";
         const API_URL = `https://api.github.com/repos/${REPO}/contents/settings.json`;
         const MAIN_TABLES = ['N1', 'N2', 'GA'];
-        
+
         let token = localStorage.getItem('gh_token') || '';
         let cloudData = null;
         let fileSha = null;
@@ -287,7 +311,7 @@
 
         async function login() {
             token = document.getElementById('gh-token').value.trim();
-            if(!token) return;
+            if (!token) return;
             document.getElementById('login-error').style.display = 'none';
             await checkTokenAndLoad();
         }
@@ -299,37 +323,37 @@
 
         async function checkTokenAndLoad() {
             const btn = document.querySelector('.login-box button');
-            if(btn) btn.textContent = "Verificando...";
-            
+            if (btn) btn.textContent = "Verificando...";
+
             try {
                 const res = await fetch(API_URL, {
                     headers: { "Authorization": `token ${token}` }
                 });
-                
+
                 if (!res.ok) throw new Error("Acesso negado");
-                
+
                 const data = await res.json();
                 fileSha = data.sha;
-                
+
                 // Decode base64 utf-8 safely
                 const contentStr = decodeURIComponent(escape(atob(data.content)));
                 cloudData = JSON.parse(contentStr);
-                
-                if(!cloudData.daily_scales) cloudData.daily_scales = {};
-                
+
+                if (!cloudData.daily_scales) cloudData.daily_scales = {};
+
                 localStorage.setItem('gh_token', token);
                 document.getElementById('login-screen').style.display = 'none';
                 document.getElementById('app-screen').style.display = 'block';
-                
+
                 populateDatalists();
                 renderTables();
-                
+
             } catch (e) {
                 console.error(e);
                 localStorage.removeItem('gh_token');
-                if(btn) btn.textContent = "Acessar Painel";
+                if (btn) btn.textContent = "Acessar Painel";
                 const errBox = document.getElementById('login-error');
-                if(errBox) {
+                if (errBox) {
                     errBox.style.display = 'block';
                     document.getElementById('login-screen').style.display = 'flex';
                     document.getElementById('app-screen').style.display = 'none';
@@ -388,10 +412,10 @@
         }
 
         function renderTables() {
-            if(!cloudData.daily_scales[currentSelectedDate]) {
+            if (!cloudData.daily_scales[currentSelectedDate]) {
                 cloudData.daily_scales[currentSelectedDate] = {};
             }
-            
+
             const dailyData = cloudData.daily_scales[currentSelectedDate];
             const container = document.getElementById('tables-container');
             container.innerHTML = '';
@@ -414,11 +438,11 @@
                             </thead>
                             <tbody>
                 `;
-                
+
                 rows.forEach(r => {
                     html += generateRowHtml(r);
                 });
-                
+
                 html += `
                             </tbody>
                         </table>
@@ -429,13 +453,13 @@
             });
         }
 
-        window.addRow = function(tableId) {
+        window.addRow = function (tableId) {
             const tbody = document.querySelector(`table[data-table="${tableId}"] tbody`);
             tbody.insertAdjacentHTML('beforeend', generateRowHtml());
             saveMemoryToCloud();
         };
 
-        window.deleteRow = function(btn) {
+        window.deleteRow = function (btn) {
             btn.closest('tr').remove();
             saveMemoryToCloud();
         };
@@ -444,12 +468,12 @@
         let cloudSaveTimeout = null;
         function saveMemoryToCloud() {
             // Memory update pass
-            if(!cloudData.daily_scales[currentSelectedDate]) cloudData.daily_scales[currentSelectedDate] = {};
-            
+            if (!cloudData.daily_scales[currentSelectedDate]) cloudData.daily_scales[currentSelectedDate] = {};
+
             MAIN_TABLES.forEach(tableId => {
                 const tbody = document.querySelector(`table[data-table="${tableId}"] tbody`);
-                if(!tbody) return;
-                
+                if (!tbody) return;
+
                 cloudData.daily_scales[currentSelectedDate][tableId] = Array.from(tbody.querySelectorAll('tr')).map(tr => {
                     const tStart = tr.querySelector('.cell-time-start').value;
                     const tEnd = tr.querySelector('.cell-time-end').value;
@@ -472,17 +496,17 @@
             if (cloudSaveTimeout) clearTimeout(cloudSaveTimeout);
             document.getElementById('sync-status').style.display = 'block';
             document.getElementById('sync-status').textContent = 'Agendando sincronização...⌛';
-            
+
             cloudSaveTimeout = setTimeout(async () => {
                 try {
                     document.getElementById('sync-status').style.backgroundColor = 'var(--primary-color)';
                     document.getElementById('sync-status').style.color = '#000';
                     document.getElementById('sync-status').textContent = 'Sincronizando com a Nuvem... 🚀';
-                    
+
                     const strData = JSON.stringify(cloudData);
                     // Encode base64 utf-8 safely
                     const b64Data = btoa(unescape(encodeURIComponent(strData)));
-                    
+
                     const payload = {
                         message: "Update Settings from Mobile Admin",
                         content: b64Data,
@@ -496,15 +520,15 @@
                         body: JSON.stringify(payload)
                     });
 
-                    if(!res.ok) throw new Error("Erro no salvamento.");
+                    if (!res.ok) throw new Error("Erro no salvamento.");
                     const answer = await res.json();
                     fileSha = answer.content.sha; // Update SHA for next puts
-                    
+
                     document.getElementById('sync-status').style.backgroundColor = 'var(--success-color)';
                     document.getElementById('sync-status').textContent = 'Salvo na Nuvem! ✔️';
                     setTimeout(() => { document.getElementById('sync-status').style.display = 'none'; }, 2000);
 
-                } catch(e) {
+                } catch (e) {
                     console.error("Cloud Save Error", e);
                     document.getElementById('sync-status').style.backgroundColor = 'var(--danger-color)';
                     document.getElementById('sync-status').style.color = '#fff';
@@ -512,6 +536,80 @@
                 }
             }, 2500); // 2.5s debounce
         }
+
+        async function captureWebScale() {
+            const btn = document.querySelector('.btn-capture');
+            const originalText = btn.textContent;
+            btn.textContent = "Processando...";
+
+            // Ocultar Header e botões de ação para a foto ficar limpa (estilo "Modo Leitura")
+            const header = document.querySelector('header');
+            const syncStatus = document.getElementById('sync-status');
+            const deleteBtns = document.querySelectorAll('.btn-delete');
+            const addBtns = document.querySelectorAll('button[onclick^="addRow"]');
+            const thLast = document.querySelectorAll('th:last-child');
+            const tdLast = document.querySelectorAll('td:last-child');
+            const inputs = document.querySelectorAll('input, select');
+
+            // Esconde UI de Admin
+            header.style.display = 'none';
+            if (syncStatus) syncStatus.style.display = 'none';
+            deleteBtns.forEach(b => b.style.display = 'none');
+            addBtns.forEach(b => b.style.display = 'none');
+            thLast.forEach(t => t.style.display = 'none');
+            tdLast.forEach(t => t.style.display = 'none');
+
+            // Remove bordas dos inputs para parecer "texto plano" igual modo leitura
+            inputs.forEach(inp => {
+                inp.dataset.oldBg = inp.style.background;
+                inp.dataset.oldBorder = inp.style.border;
+                inp.style.background = 'transparent';
+                inp.style.border = 'none';
+                inp.style.appearance = 'none'; // remove setinha do select
+            });
+
+            // Aguarda renderização do DOM
+            await new Promise(r => setTimeout(r, 100));
+
+            try {
+                const canvas = await html2canvas(document.getElementById('app-screen'), {
+                    backgroundColor: '#004554', // Usa a surface color
+                    scale: 2,
+                    windowWidth: document.getElementById('app-screen').scrollWidth,
+                    useCORS: true
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+
+                // Força download
+                const link = document.createElement('a');
+                link.download = `Escala_${currentSelectedDate}.png`;
+                link.href = imgData;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+            } catch (e) {
+                console.error(e);
+                alert("Erro ao capturar a imagem da escala.");
+            } finally {
+                // Restaura UI de Admin
+                header.style.display = 'flex';
+                deleteBtns.forEach(b => b.style.display = 'inline-block');
+                addBtns.forEach(b => b.style.display = 'block');
+                thLast.forEach(t => t.style.display = 'table-cell');
+                tdLast.forEach(t => t.style.display = 'table-cell');
+
+                inputs.forEach(inp => {
+                    inp.style.background = inp.dataset.oldBg || '';
+                    inp.style.border = inp.dataset.oldBorder || '';
+                    inp.style.appearance = '';
+                });
+
+                btn.textContent = originalText;
+            }
+        }
     </script>
 </body>
+
 </html>
