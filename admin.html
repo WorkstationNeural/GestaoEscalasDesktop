@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestão de Escalas - Painel Web</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #005f73;
+            --surface-color: #004554;
+            --text-color: #ffffff;
+            --border-color: rgba(255, 255, 255, 0.15);
+            --primary-color: #e9d8a6;
+            --primary-hover: #d4c391;
+            --primary-text: #f4e8c1;
+            --danger-color: #e63946;
+            --success-color: #94d2bd;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-color) 0%, #003e4b 100%);
+            background-attachment: fixed;
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* TELA DE LOGIN */
+        #login-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: rgba(0, 69, 84, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* TELA PRINCIPAL */
+        #app-screen {
+            display: none;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .date-navigator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            background: rgba(0, 69, 84, 0.4);
+            backdrop-filter: blur(8px);
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .date-navigator input {
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.1rem;
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: #003e4b;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            margin-top: 15px;
+        }
+
+        .table-title {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 1.2rem;
+            color: var(--primary-text);
+            background: var(--surface-color);
+            padding: 10px;
+            border-radius: 8px 8px 0 0;
+            margin-bottom: 0;
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            background: rgba(0, 69, 84, 0.4);
+            border: 1px solid var(--border-color);
+            border-radius: 0 0 8px 8px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            min-width: 600px;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 6px;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .time-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            justify-content: center;
+        }
+        .time-container input[type="time"] {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 2px;
+            border-radius: 4px;
+            width: 100px;
+        }
+
+        .btn-delete {
+            background-color: var(--danger-color);
+            color: #fff;
+            padding: 5px 10px;
+            width: auto;
+        }
+
+        #sync-status {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-box">
+            <h2 style="color: var(--primary-text); margin-top: 0;">Acesso Restrito</h2>
+            <p style="font-size: 0.9em; opacity: 0.8;">Para editar escalas remotamente, insira o seu Personal Access Token do GitHub.</p>
+            <input type="password" id="gh-token" placeholder="ghp_****************************">
+            <button onclick="login()">Acessar Painel</button>
+            <div id="login-error" style="color: var(--danger-color); margin-top: 10px; display: none;">Token inválido ou sem acesso.</div>
+        </div>
+    </div>
+
+    <!-- TELA PRINCIPAL (APP) -->
+    <div id="app-screen">
+        <header>
+            <h1>Gestão de Escalas (Logado)</h1>
+            <div class="date-navigator">
+                <label>Data:</label>
+                <input type="date" id="date-picker">
+            </div>
+            <button class="btn-logout" onclick="logout()">Sair (Remover Token)</button>
+        </header>
+
+        <div id="tables-container">
+            <!-- Tables injected by JS -->
+        </div>
+    </div>
+
+    <div id="sync-status">Sincronizando...</div>
+
+    <!-- Lista de Sugestões Oculta -->
+    <datalist id="tech-suggestions"></datalist>
+    <datalist id="site-suggestions"></datalist>
+    <datalist id="mode-suggestions"></datalist>
+
+    <script>
+        const REPO = "WorkstationNeural/GestaoEscalasDesktop";
+        const API_URL = `https://api.github.com/repos/${REPO}/contents/settings.json`;
+        const MAIN_TABLES = ['N1', 'N2', 'GA'];
+        
+        let token = localStorage.getItem('gh_token') || '';
+        let cloudData = null;
+        let fileSha = null;
+        let currentSelectedDate = '';
+
+        // Lifecycle
+        document.addEventListener('DOMContentLoaded', () => {
+            if (token) {
+                checkTokenAndLoad();
+            } else {
+                document.getElementById('login-screen').style.display = 'flex';
+            }
+
+            // Set Date
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            currentSelectedDate = `${y}-${m}-${d}`;
+            document.getElementById('date-picker').value = currentSelectedDate;
+
+            document.getElementById('date-picker').addEventListener('change', (e) => {
+                currentSelectedDate = e.target.value;
+                renderTables();
+            });
+
+            // Auto-Save listeners
+            document.body.addEventListener('input', (e) => {
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') {
+                    if (e.target.id === 'date-picker' || e.target.id === 'gh-token') return;
+                    saveMemoryToCloud();
+                }
+            });
+        });
+
+        async function login() {
+            token = document.getElementById('gh-token').value.trim();
+            if(!token) return;
+            document.getElementById('login-error').style.display = 'none';
+            await checkTokenAndLoad();
+        }
+
+        function logout() {
+            localStorage.removeItem('gh_token');
+            location.reload();
+        }
+
+        async function checkTokenAndLoad() {
+            const btn = document.querySelector('.login-box button');
+            if(btn) btn.textContent = "Verificando...";
+            
+            try {
+                const res = await fetch(API_URL, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+                
+                if (!res.ok) throw new Error("Acesso negado");
+                
+                const data = await res.json();
+                fileSha = data.sha;
+                
+                // Decode base64 utf-8 safely
+                const contentStr = decodeURIComponent(escape(atob(data.content)));
+                cloudData = JSON.parse(contentStr);
+                
+                if(!cloudData.daily_scales) cloudData.daily_scales = {};
+                
+                localStorage.setItem('gh_token', token);
+                document.getElementById('login-screen').style.display = 'none';
+                document.getElementById('app-screen').style.display = 'block';
+                
+                populateDatalists();
+                renderTables();
+                
+            } catch (e) {
+                console.error(e);
+                localStorage.removeItem('gh_token');
+                if(btn) btn.textContent = "Acessar Painel";
+                const errBox = document.getElementById('login-error');
+                if(errBox) {
+                    errBox.style.display = 'block';
+                    document.getElementById('login-screen').style.display = 'flex';
+                    document.getElementById('app-screen').style.display = 'none';
+                }
+            }
+        }
+
+        function populateDatalists() {
+            const appendOptions = (listId, array) => {
+                const dl = document.getElementById(listId);
+                dl.innerHTML = '';
+                (array || []).forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item;
+                    dl.appendChild(opt);
+                });
+            };
+            appendOptions('tech-suggestions', cloudData.technicians);
+            appendOptions('site-suggestions', cloudData.sites);
+            appendOptions('mode-suggestions', cloudData.modes);
+        }
+
+        function generateRowHtml(r = {}) {
+            let timeStart = '', timeEnd = '';
+            if (r.time && r.time.includes(' às ')) {
+                const parts = r.time.split(' às ');
+                timeStart = parts[0];
+                timeEnd = parts[1];
+            } else if (r.time && r.time.includes('até às')) {
+                timeEnd = r.time.replace('até às ', '').trim();
+            } else {
+                timeStart = r.time || '';
+            }
+
+            return `
+                <tr>
+                    <td>
+                        <div class="time-container">
+                            <input type="time" class="cell-time-start" value="${timeStart}">
+                            <span style="font-size:12px">às</span>
+                            <input type="time" class="cell-time-end" value="${timeEnd}">
+                        </div>
+                    </td>
+                    <td><input type="text" list="tech-suggestions" class="cell-name" value="${r.name || ''}" placeholder="Nome"></td>
+                    <td><input type="text" class="cell-date" value="${r.date || ''}" placeholder="dd/mm"></td>
+                    <td>
+                        <select class="cell-mode">
+                             <option value=""></option>
+                            ${(cloudData.modes || []).map(m => `<option value="${m}" ${r.mode === m ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </td>
+                    <td><input type="text" list="site-suggestions" class="cell-site" value="${r.site || ''}" placeholder="Site"></td>
+                    <td><button class="btn-delete" onclick="deleteRow(this)">X</button></td>
+                </tr>
+            `;
+        }
+
+        function renderTables() {
+            if(!cloudData.daily_scales[currentSelectedDate]) {
+                cloudData.daily_scales[currentSelectedDate] = {};
+            }
+            
+            const dailyData = cloudData.daily_scales[currentSelectedDate];
+            const container = document.getElementById('tables-container');
+            container.innerHTML = '';
+
+            MAIN_TABLES.forEach(tableId => {
+                const rows = dailyData[tableId] || [];
+                let html = `
+                    <h2 class="table-title">${tableId}</h2>
+                    <div class="table-container">
+                        <table data-table="${tableId}">
+                            <thead>
+                                <tr>
+                                    <th>Horário</th>
+                                    <th>Nome</th>
+                                    <th>Data</th>
+                                    <th>Modalidade</th>
+                                    <th>Site</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+                
+                rows.forEach(r => {
+                    html += generateRowHtml(r);
+                });
+                
+                html += `
+                            </tbody>
+                        </table>
+                        <button onclick="addRow('${tableId}')" style="margin: 10px; width: calc(100% - 20px);">+ Adicionar Linha ${tableId}</button>
+                    </div>
+                `;
+                container.innerHTML += html;
+            });
+        }
+
+        window.addRow = function(tableId) {
+            const tbody = document.querySelector(`table[data-table="${tableId}"] tbody`);
+            tbody.insertAdjacentHTML('beforeend', generateRowHtml());
+            saveMemoryToCloud();
+        };
+
+        window.deleteRow = function(btn) {
+            btn.closest('tr').remove();
+            saveMemoryToCloud();
+        };
+
+        // Engine de salvamento
+        let cloudSaveTimeout = null;
+        function saveMemoryToCloud() {
+            // Memory update pass
+            if(!cloudData.daily_scales[currentSelectedDate]) cloudData.daily_scales[currentSelectedDate] = {};
+            
+            MAIN_TABLES.forEach(tableId => {
+                const tbody = document.querySelector(`table[data-table="${tableId}"] tbody`);
+                if(!tbody) return;
+                
+                cloudData.daily_scales[currentSelectedDate][tableId] = Array.from(tbody.querySelectorAll('tr')).map(tr => {
+                    const tStart = tr.querySelector('.cell-time-start').value;
+                    const tEnd = tr.querySelector('.cell-time-end').value;
+                    let fmt = '';
+                    if (tStart && tEnd) fmt = `${tStart} às ${tEnd}`;
+                    else if (tStart) fmt = tStart;
+                    else if (tEnd) fmt = `até às ${tEnd}`;
+
+                    return {
+                        time: fmt,
+                        name: tr.querySelector('.cell-name').value,
+                        date: tr.querySelector('.cell-date').value,
+                        mode: tr.querySelector('.cell-mode').value,
+                        site: tr.querySelector('.cell-site').value
+                    };
+                });
+            });
+
+            // Debouncer API
+            if (cloudSaveTimeout) clearTimeout(cloudSaveTimeout);
+            document.getElementById('sync-status').style.display = 'block';
+            document.getElementById('sync-status').textContent = 'Agendando sincronização...⌛';
+            
+            cloudSaveTimeout = setTimeout(async () => {
+                try {
+                    document.getElementById('sync-status').style.backgroundColor = 'var(--primary-color)';
+                    document.getElementById('sync-status').style.color = '#000';
+                    document.getElementById('sync-status').textContent = 'Sincronizando com a Nuvem... 🚀';
+                    
+                    const strData = JSON.stringify(cloudData);
+                    // Encode base64 utf-8 safely
+                    const b64Data = btoa(unescape(encodeURIComponent(strData)));
+                    
+                    const payload = {
+                        message: "Update Settings from Mobile Admin",
+                        content: b64Data,
+                        sha: fileSha,
+                        branch: "main"
+                    };
+
+                    const res = await fetch(API_URL, {
+                        method: 'PUT',
+                        headers: { "Authorization": `token ${token}` },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if(!res.ok) throw new Error("Erro no salvamento.");
+                    const answer = await res.json();
+                    fileSha = answer.content.sha; // Update SHA for next puts
+                    
+                    document.getElementById('sync-status').style.backgroundColor = 'var(--success-color)';
+                    document.getElementById('sync-status').textContent = 'Salvo na Nuvem! ✔️';
+                    setTimeout(() => { document.getElementById('sync-status').style.display = 'none'; }, 2000);
+
+                } catch(e) {
+                    console.error("Cloud Save Error", e);
+                    document.getElementById('sync-status').style.backgroundColor = 'var(--danger-color)';
+                    document.getElementById('sync-status').style.color = '#fff';
+                    document.getElementById('sync-status').textContent = 'Erro de Sincronização ❌';
+                }
+            }, 2500); // 2.5s debounce
+        }
+    </script>
+</body>
+</html>
